@@ -4,7 +4,9 @@ import Img from 'gatsby-image';
 import { useCart } from 'react-use-cart';
 import queryString from 'query-string';
 import { navigate } from '@reach/router';
+import useForm from 'react-hook-form';
 
+import Select from '../components/Select';
 import ReviewsList from '../components/ReviewsList';
 
 function ProductPage({
@@ -21,6 +23,7 @@ function ProductPage({
     variantId || firstVariant.id
   );
   const { addItem } = useCart();
+  const { handleSubmit, register, isSubmitting } = useForm();
 
   const activeVariant = variants.find(
     variant => variant.id === activeVariantId
@@ -29,6 +32,25 @@ function ProductPage({
   useEffect(() => {
     navigate(`?variantId=${activeVariantId}`, { replace: true });
   }, [activeVariantId]);
+
+  const onSubmit = values => {
+    try {
+      console.log(values);
+
+      addItem(
+        {
+          id: values.id,
+          price: values.retail_price,
+          image: values.variantImage,
+          name: values.name,
+          description: product.description.markdown,
+        },
+        variantQuantity
+      );
+    } catch (err) {
+      console.log(err);
+    }
+  };
 
   return (
     <React.Fragment>
@@ -65,6 +87,7 @@ function ProductPage({
               </p>
             </div>
           )}
+
           <div className="md:flex md:flex-wrap -mx-3">
             <div className="md:w-3/4 px-3 mb-6">
               <label
@@ -75,20 +98,18 @@ function ProductPage({
               </label>
 
               <div className="relative">
-                <select
+                <Select
                   id="style"
+                  ref={register({ required: 'You must select a variant' })}
                   value={activeVariantId}
                   onChange={({ target: { value } }) =>
                     setActiveVariantId(value)
                   }
-                  className="block appearance-none w-full bg-white border-2 border-slategray px-4 py-3 pr-8 focus:outline-none focus:bg-white text-slategray focus:text-slategray rounded"
-                >
-                  {variants.map((variant, index) => (
-                    <option key={index} value={variant.id}>
-                      {variant.splitName}
-                    </option>
-                  ))}
-                </select>
+                  options={variants.map(variant => ({
+                    name: variant.splitName,
+                    value: variant.value,
+                  }))}
+                />
 
                 <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-slategray">
                   <svg
@@ -142,22 +163,12 @@ function ProductPage({
               </div>
             </div>
           </div>
+
           <div className="mb-6">
             <button
+              type="submit"
               className="block w-full bg-primary hover:bg-slategray px-4 py-3 rounded text-white text-sm font-bold tracking-widest uppercase focus:outline-none"
-              onClick={() =>
-                addItem(
-                  {
-                    id: activeVariant.id,
-                    price: activeVariant.retail_price,
-                    image: activeVariant.variantImage,
-                    name: activeVariant.name,
-                    description: product.description.markdown,
-                  },
-                  variantQuantity
-                )
-              }
-              disabled={!activeVariant}
+              disabled={!activeVariant | isSubmitting}
             >
               Add to cart
             </button>

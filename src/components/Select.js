@@ -7,7 +7,7 @@ function Select({ register, name, options, ...rest }) {
         name={name}
         ref={register}
         {...rest}
-        className="block appearance-none w-full bg-white border-2 border-slategray px-4 py-3 pr-8 focus:outline-none focus:bg-white text-slategray focus:text-slategray rounded"
+        className="block appearance-none w-full bg-white border-2 border-lightgray px-4 py-3 pr-8 focus:outline-none focus:bg-white text-slategray focus:text-slategray rounded"
       >
         {options.map(({ value, name }) => (
           <option key={value} value={value}>
